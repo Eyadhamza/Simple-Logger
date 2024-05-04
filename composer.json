@@ -1,12 +1,11 @@
 {
-    "name": "zeal/logger",
-    "description": "This is my package zeal-logger",
+    "name": "pi-space/logger",
+    "description": "This is my package simple-logger",
     "keywords": [
-        "Zeal",
         "laravel",
-        "zeal-logger"
+        "simple-logger"
     ],
-    "homepage": "https://github.com/zeal/zeal-logger",
+    "homepage": "https://github.com/simple/simple-logger",
     "license": "MIT",
     "authors": [
         {
@@ -43,7 +42,7 @@
     },
     "scripts": {
         "post-autoload-dump": "@composer run prepare",
-        "clear": "@php vendor/bin/testbench package:purge-zeal-logger --ansi",
+        "clear": "@php vendor/bin/testbench package:purge-simple-logger --ansi",
         "prepare": "@php vendor/bin/testbench package:discover --ansi",
         "build": [
             "@composer run prepare",

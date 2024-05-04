@@ -1,4 +1,4 @@
-# Zeal Logger
+# Simple Logger
 
 [![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/zeal/zeal-logger/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/zeal/zeal-logger/actions?query=workflow%3Arun-tests+branch%3Amain)
 [![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/zeal/zeal-logger/fix-php-code-style-issues.yml?branch=main&label=code%20style&style=flat-square)](https://github.com/zeal/zeal-logger/actions?query=workflow%3A"Fix+PHP+code+style+issues"+branch%3Amain)
@@ -18,7 +18,7 @@
 - [License](#license)
 
 ## About
-Zeal Logger is a simple API logger that efficiently logs all requests and responses to your app.
+Simple Logger is a simple API logger that efficiently logs all requests and responses to your app.
 
 ## Installation
 
@@ -38,22 +38,22 @@ php artisan migrate
 ## Usage
 
 ### 1. Adding the Logger Middleware
-Add the `Zeal\Logger\Core\Middleware\LoggerMiddleware` middleware to the `api` middleware group in your `app/Http/Kernel.php` file. It's recommended to add it as the first middleware in the group to ensure it logs all requests and responses.
+Add the `Simple\Logger\Core\Middleware\LoggerMiddleware` middleware to the `api` middleware group in your `app/Http/Kernel.php` file. It's recommended to add it as the first middleware in the group to ensure it logs all requests and responses.
 
 ```php
 protected $middlewareGroups = [
     'api' => [
-        \Zeal\Logger\Core\Middleware\LoggerMiddleware::class,
+        \Simple\Logger\Core\Middleware\LoggerMiddleware::class,
         // ...
     ],
 ];
 ```
 
 ### 2. Logging Loggable Entities
-In your app, you may have different entities that you want to log, such as app entities or user entities. To associate logs with these entities, call the `logLoggableEntity` method on the `Zeal\Logger\LoggerService` class, passing the entity as the first argument. For example, in a middleware that identifies a POS System calling your API:
+In your app, you may have different entities that you want to log, such as app entities or user entities. To associate logs with these entities, call the `logLoggableEntity` method on the `Simple\Logger\LoggerService` class, passing the entity as the first argument. For example, in a middleware that identifies a POS System calling your API:
 
 ```php
-use Zeal\Logger\LoggerService;
+use Simple\Logger\LoggerService;
 
 class IdentifyPosSystem
 {
@@ -69,7 +69,7 @@ class IdentifyPosSystem
 ```
 
 ### 3. Logging Exceptions
-- If an exception occurs in the request and response cycle, log it using the `log` method on the `Zeal\Logger\LoggerService` class, passing the exception as the first argument.
+- If an exception occurs in the request and response cycle, log it using the `log` method on the `Simple\Logger\LoggerService` class, passing the exception as the first argument.
 - Alternatively, bind the Logger in your `App\Exceptions\Handler` class and call the `log` method to log exceptions. Ensure to use the `safeCall` function to prevent re-throwing the exception.
 
 ```php
@@ -115,4 +115,4 @@ The MIT License (MIT). Please see [License File](LICENSE.md) for more informatio
 
 ---
 
-Happy 1st birthday to Zeal Logger! 🎉🎂
+Happy 1st birthday to Simple Logger! 🎉🎂
