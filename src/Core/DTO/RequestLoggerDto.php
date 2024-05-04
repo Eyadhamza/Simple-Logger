@@ -1,6 +1,6 @@
 <?php
 
-namespace Zeal\Logger\Core\DTO;
+namespace PiSpace\Logger\Core\DTO;
 
 use Illuminate\Http\Request;
 

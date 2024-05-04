@@ -1,23 +1,23 @@
 <?php
 
-namespace Zeal\Logger;
+namespace PiSpace\Logger;
 
 use Closure;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 use Throwable;
-use Zeal\Logger\Core\DTO\ExceptionLoggerDto;
-use Zeal\Logger\Core\DTO\RequestLoggerDto;
-use Zeal\Logger\Core\DTO\ResponseLoggerDto;
-use Zeal\Logger\Core\Jobs\LogExceptionJob;
-use Zeal\Logger\Core\Jobs\LogLoggableEntityJob;
-use Zeal\Logger\Core\Jobs\LogResponseJob;
-use Zeal\Logger\Core\Models\ApiLog;
+use PiSpace\Logger\Core\DTO\ExceptionLoggerDto;
+use PiSpace\Logger\Core\DTO\RequestLoggerDto;
+use PiSpace\Logger\Core\DTO\ResponseLoggerDto;
+use PiSpace\Logger\Core\Jobs\LogExceptionJob;
+use PiSpace\Logger\Core\Jobs\LogLoggableEntityJob;
+use PiSpace\Logger\Core\Jobs\LogResponseJob;
+use PiSpace\Logger\Core\Models\ApiLog;
 
 class LoggerService
 {
-    private static ApiLog $log;
+    private ?ApiLog $log = null;
 
     public function __construct(private readonly RequestLoggerDto $requestLoggerDto)
     {
@@ -25,7 +25,7 @@ class LoggerService
 
     public function createInitialLog(): void
     {
-        self::safeCall(fn() => self::$log = ApiLog::create([
+        self::safeCall(fn() => $this->log = ApiLog::create([
             'method' => $this->requestLoggerDto->method,
             'endpoint' => $this->requestLoggerDto->endpoint,
             'headers' => $this->requestLoggerDto->headers,
@@ -33,7 +33,7 @@ class LoggerService
         ]));
     }
 
-    public static function log(Throwable|Response $loggable): void
+    public function log(Throwable|Response $loggable): void
     {
         $callback = match (true) {
             $loggable instanceof Throwable => fn() => self::logException($loggable),
@@ -43,21 +43,21 @@ class LoggerService
         self::safeCall($callback);
     }
 
-    public static function logLoggableEntity(Model $loggableEntity): void
+    public function logLoggableEntity(Model $loggableEntity): void
     {
-        LogLoggableEntityJob::dispatchAfterResponse($loggableEntity, self::$log);
+        LogLoggableEntityJob::dispatchAfterResponse($loggableEntity, $this->log);
     }
 
-    private static function logResponse(Response $response): void
+    private function logResponse(Response $response): void
     {
         if ($response->isEmpty()) {
             return;
         }
 
-        LogResponseJob::dispatchAfterResponse(new ResponseLoggerDto($response->getContent()), self::$log);
+        LogResponseJob::dispatchAfterResponse(new ResponseLoggerDto($response->getContent()), $this->log);
     }
 
-    private static function logException(Throwable $throwable): void
+    private function logException(Throwable $throwable): void
     {
         LogExceptionJob::dispatchAfterResponse(
             new ExceptionLoggerDto(
@@ -66,7 +66,9 @@ class LoggerService
                 $throwable->getFile(),
                 $throwable->getLine(),
                 $throwable->getTraceAsString(),
-            ), self::$log);
+            ),
+            $this->log
+        );
     }
 
     public static function safeCall(Closure $closure): void

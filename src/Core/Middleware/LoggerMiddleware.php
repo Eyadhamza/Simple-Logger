@@ -1,11 +1,11 @@
 <?php
 
-namespace Zeal\Logger\Core\Middleware;
+namespace PiSpace\Logger\Core\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Zeal\Logger\LoggerService;
+use PiSpace\Logger\LoggerService;
 
 class LoggerMiddleware
 {
@@ -17,6 +17,6 @@ class LoggerMiddleware
 
     public function terminate(Request $request, Response $response): void
     {
-        LoggerService::log($response);
+        app(LoggerService::class)->log($response);
     }
 }

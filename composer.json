@@ -30,13 +30,13 @@
     },
     "autoload": {
         "psr-4": {
-            "Zeal\\Logger\\": "src/",
-            "Zeal\\Logger\\Database\\Factories\\": "database/factories/"
+            "PiSpace\\Logger\\": "src/",
+            "PiSpace\\Logger\\Database\\Factories\\": "database/factories/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Zeal\\Logger\\Tests\\": "tests/",
+            "PiSpace\\Logger\\Tests\\": "tests/",
             "Workbench\\App\\": "workbench/app/"
         }
     },
@@ -68,10 +68,10 @@
     "extra": {
         "laravel": {
             "providers": [
-                "Zeal\\Logger\\ZealLoggerServiceProvider"
+                "PiSpace\\Logger\\SimpleLoggerServiceProvider"
             ],
             "aliases": {
-                "ZealLogger": "Zeal\\Logger\\Facades\\ZealLogger"
+                "PiSpaceLogger": "PiSpace\\Logger\\Facades\\PiSpaceLogger"
             }
         }
     },

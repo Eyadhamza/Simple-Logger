@@ -1,3 +1,3 @@
 # Changelog
 
-All notable changes to `Zeal-Logger` will be documented in this file.
+All notable changes to `PiSpace-Logger` will be documented in this file.

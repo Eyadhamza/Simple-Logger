@@ -1,6 +1,6 @@
 <?php
 
-namespace Zeal\Logger\Core\Models;
+namespace PiSpace\Logger\Core\Models;
 
 use Dyrynda\Database\Support\GeneratesUuid;
 use Illuminate\Database\Eloquent\Model;

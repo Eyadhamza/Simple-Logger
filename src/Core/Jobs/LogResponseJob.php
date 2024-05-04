@@ -1,14 +1,14 @@
 <?php
 
-namespace Zeal\Logger\Core\Jobs;
+namespace PiSpace\Logger\Core\Jobs;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Zeal\Logger\Core\DTO\ResponseLoggerDto;
-use Zeal\Logger\Core\Models\ApiLog;
+use PiSpace\Logger\Core\DTO\ResponseLoggerDto;
+use PiSpace\Logger\Core\Models\ApiLog;
 
 class LogResponseJob implements ShouldQueue
 {

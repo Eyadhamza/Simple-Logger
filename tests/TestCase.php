@@ -1,10 +1,10 @@
 <?php
 
-namespace Zeal\Logger\Tests;
+namespace PiSpace\Logger\Tests;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Orchestra\Testbench\TestCase as Orchestra;
-use Zeal\Logger\ZealLoggerServiceProvider;
+use PiSpace\Logger\SimpleLoggerServiceProvider;
 
 class TestCase extends Orchestra
 {
@@ -13,14 +13,14 @@ class TestCase extends Orchestra
         parent::setUp();
 
         Factory::guessFactoryNamesUsing(
-            fn (string $modelName) => 'Zeal\\ZealLogger\\Database\\Factories\\'.class_basename($modelName).'Factory'
+            fn (string $modelName) => 'PiSpace\\PiSpaceLogger\\Database\\Factories\\'.class_basename($modelName).'Factory'
         );
     }
 
     protected function getPackageProviders($app)
     {
         return [
-            ZealLoggerServiceProvider::class,
+            SimpleLoggerServiceProvider::class,
         ];
     }
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace Zeal\Logger\Database\Factories;
+namespace PiSpace\Logger\Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 
