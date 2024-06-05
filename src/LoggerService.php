@@ -43,8 +43,11 @@ class LoggerService
         self::safeCall($callback);
     }
 
-    public function logLoggableEntity(Model $loggableEntity): void
+    public function logLoggableEntity(?Model $loggableEntity): void
     {
+        if (! $loggableEntity) {
+            return;
+        }
         LogLoggableEntityJob::dispatchAfterResponse($loggableEntity, $this->log);
     }
 
