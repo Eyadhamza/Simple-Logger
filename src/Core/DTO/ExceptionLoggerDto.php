@@ -13,4 +13,27 @@ class ExceptionLoggerDto
     )
     {
     }
+
+
+    public static function make(\Throwable $throwable)
+    {
+        return new self(
+            $throwable->getMessage(),
+            $throwable->getCode(),
+            $throwable->getFile(),
+            $throwable->getLine(),
+            $throwable->getTraceAsString(),
+        );
+    }
+
+    public function toArray(): array
+    {
+        return [
+            'message' => $this->message,
+            'code' => $this->code,
+            'file' => $this->file,
+            'line' => $this->line,
+            'trace' => $this->trace,
+        ];
+    }
 }

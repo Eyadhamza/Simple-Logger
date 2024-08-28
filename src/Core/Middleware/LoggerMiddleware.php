@@ -11,7 +11,6 @@ class LoggerMiddleware
 {
     public function handle(Request $request, Closure $next)
     {
-        app(LoggerService::class)->createInitialLog();
         return $next($request);
     }
 

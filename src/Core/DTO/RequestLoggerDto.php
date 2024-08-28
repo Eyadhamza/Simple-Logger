@@ -24,4 +24,14 @@ class RequestLoggerDto
             $request->headers->all(),
         );
     }
+
+    public function toArray(): array
+    {
+        return [
+            'method' => $this->method,
+            'endpoint' => $this->endpoint,
+            'request_payload' => $this->requestPayload,
+            'headers' => $this->headers,
+        ];
+    }
 }

@@ -9,71 +9,53 @@ use Symfony\Component\HttpFoundation\Response;
 use Throwable;
 use PiSpace\Logger\Core\DTO\ExceptionLoggerDto;
 use PiSpace\Logger\Core\DTO\RequestLoggerDto;
-use PiSpace\Logger\Core\DTO\ResponseLoggerDto;
-use PiSpace\Logger\Core\Jobs\LogExceptionJob;
-use PiSpace\Logger\Core\Jobs\LogLoggableEntityJob;
-use PiSpace\Logger\Core\Jobs\LogResponseJob;
+use PiSpace\Logger\Core\Jobs\CreateLogJob;
 use PiSpace\Logger\Core\Models\ApiLog;
 
 class LoggerService
 {
-    private ?ApiLog $log = null;
+    private ApiLog $log;
 
-    public function __construct(private readonly RequestLoggerDto $requestLoggerDto)
+    public function __construct(RequestLoggerDto $requestLoggerDto)
     {
-    }
-
-    public function createInitialLog(): void
-    {
-        self::safeCall(fn() => $this->log = ApiLog::create([
-            'method' => $this->requestLoggerDto->method,
-            'endpoint' => $this->requestLoggerDto->endpoint,
-            'headers' => $this->requestLoggerDto->headers,
-            'request_payload' => $this->requestLoggerDto->requestPayload,
-        ]));
+        $this->log = ApiLog::make($requestLoggerDto->toArray());
     }
 
     public function log(Throwable|Response $loggable): void
     {
-        $callback = match (true) {
-            $loggable instanceof Throwable => fn() => self::logException($loggable),
-            $loggable instanceof Response => fn() => self::logResponse($loggable),
+        match (true) {
+            $loggable instanceof Throwable => $this->logException($loggable),
+            $loggable instanceof Response => $this->logResponse($loggable),
         };
 
-        self::safeCall($callback);
+        CreateLogJob::dispatchAfterResponse($this->log->toArray());
     }
 
     public function logLoggableEntity(Model $loggableEntity): void
     {
-        LogLoggableEntityJob::dispatchAfterResponse($loggableEntity, $this->log);
+        $this->log->fill([
+            'loggable_id' => $loggableEntity->id,
+            'loggable_type' => $loggableEntity->getMorphClass(),
+        ]);
     }
 
-    private function logResponse(Response $response): void
+    public function logResponse(Response $response): void
     {
-        if ($response->isEmpty()) {
-            return;
-        }
-
-        LogResponseJob::dispatchAfterResponse(new ResponseLoggerDto($response->getContent()), $this->log);
+        $this->log->fill([
+            'response_payload' => json_decode($response->getContent()),
+        ]);
     }
 
-    private function logException(Throwable $throwable): void
+    public function logException(Throwable $throwable): void
     {
-        LogExceptionJob::dispatchAfterResponse(
-            new ExceptionLoggerDto(
-                $throwable->getMessage(),
-                $throwable->getCode(),
-                $throwable->getFile(),
-                $throwable->getLine(),
-                $throwable->getTraceAsString(),
-            ),
-            $this->log
-        );
+        $this->log->fill([
+            'exception' => ExceptionLoggerDto::make($throwable)->toArray(),
+        ]);
     }
 
-    public static function safeCall(Closure $closure): void
+    public static function safeCall(Closure $closure): mixed
     {
-        rescue($closure, fn(Throwable $exception) => Log::error('Logger Service Failed!', [
+        return rescue($closure, fn(Throwable $exception) => Log::error('Logger Service Failed!', [
             'exception' => $exception,
         ]), false);
     }
