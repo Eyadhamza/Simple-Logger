@@ -2,23 +2,27 @@
 
 namespace PiSpace\Logger\Core\Jobs;
 
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
-use Illuminate\Queue\InteractsWithQueue;
-use PiSpace\Logger\Core\Models\ApiLog;
+use PiSpace\Logger\Core\LogDriverManager;
 
-class CreateLogJob implements ShouldQueue
+/**
+ * Dispatched via `dispatchAfterResponse` from LoggerService, so `handle()`
+ * runs in the same PHP process AFTER the HTTP response has been sent to
+ * the client. No queue worker required.
+ *
+ * If you need retry-on-failure or cross-process isolation, wrap or subclass
+ * this job and add `implements ShouldQueue`.
+ */
+class CreateLogJob
 {
-    use Dispatchable, InteractsWithQueue, Queueable;
+    use Dispatchable;
 
     public function __construct(private readonly array $logData)
     {
-
     }
 
-    public function handle(): void
+    public function handle(LogDriverManager $drivers): void
     {
-        ApiLog::create($this->logData);
+        $drivers->default()->store($this->logData);
     }
 }

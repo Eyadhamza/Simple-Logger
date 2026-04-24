@@ -3,11 +3,13 @@
 namespace PiSpace\Logger;
 
 
+use Illuminate\Contracts\Config\Repository;
 use Illuminate\Foundation\Application;
 use Illuminate\Http\Request;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
 use PiSpace\Logger\Core\DTO\RequestLoggerDto;
+use PiSpace\Logger\Core\LogDriverManager;
 use PiSpace\Logger\Core\Middleware\LoggerMiddleware;
 
 class SimpleLoggerServiceProvider extends PackageServiceProvider
@@ -20,8 +22,12 @@ class SimpleLoggerServiceProvider extends PackageServiceProvider
             );
         });
 
+        $this->app->singleton(LogDriverManager::class, function (Application $app) {
+            return new LogDriverManager($app->make(Repository::class));
+        });
+
         $this->app->singleton(LoggerMiddleware::class);
-         parent::register();
+        parent::register();
     }
 
     public function configurePackage(Package $package): void
