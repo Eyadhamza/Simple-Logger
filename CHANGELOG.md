@@ -2,6 +2,20 @@
 
 All notable changes to `PiSpace-Logger` will be documented in this file.
 
+## 2.3.0 — 2026-04-25
+
+### Security
+- **Database driver no longer writes raw secrets.** In 2.2.x, `LogPayloadSanitizer` ran inside `LokiDriver` only — meaning the default `database` driver inserted full `Authorization` headers, `password` / `current_password` / `verification_code` body fields, and any decrypted webhook payloads straight into `api_logs`. A DB dump trivially leaked credentials.
+  - Sanitization now runs once in `LoggerService::log()`, before `CreateLogJob::dispatchAfterResponse(...)`. Every driver — built-in or custom — receives a redacted record.
+  - The redaction policy is now top-level (`simple-logger.redact.{headers,body_keys,max_field_bytes}`) and shared by every driver.
+  - Per-driver `redact_headers` / `redact_body_keys` keys remain supported for backward compatibility but are deprecated.
+  - The default body-keys list grew to cover `verification_code`, `reset_code`, `pan`, `card_token`, `iv`, `auth_tag`, `ciphertext`. Default headers list grew to cover `x-csrf-token` / `x-xsrf-token`.
+- `LogDriverManager` and `LoggerService` now take a shared `LogPayloadSanitizer` via the container, bound by the service provider. `LokiDriver` continues to receive it as defense-in-depth (idempotent — calling `sanitize()` on already-sanitized data is a no-op).
+
+### Upgrade notes
+- No action required for existing installs — backward-compatible config fallback resolves the legacy `drivers.loki.redact_*` keys when the new top-level `simple-logger.redact.*` block is absent.
+- Recommended: re-publish the config (`php artisan vendor:publish --tag=simple-logger-config --force`) to pick up the broader default redact list.
+
 ## 2.2.0 — 2026-04-24
 
 ### Added

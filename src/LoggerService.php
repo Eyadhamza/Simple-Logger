@@ -11,13 +11,16 @@ use PiSpace\Logger\Core\DTO\ExceptionLoggerDto;
 use PiSpace\Logger\Core\DTO\RequestLoggerDto;
 use PiSpace\Logger\Core\Jobs\CreateLogJob;
 use PiSpace\Logger\Core\Models\ApiLog;
+use PiSpace\Logger\Core\Support\LogPayloadSanitizer;
 
 class LoggerService
 {
     private ApiLog $log;
 
-    public function __construct(RequestLoggerDto $requestLoggerDto)
-    {
+    public function __construct(
+        RequestLoggerDto $requestLoggerDto,
+        private readonly LogPayloadSanitizer $sanitizer,
+    ) {
         $this->log = ApiLog::make($requestLoggerDto->toArray());
     }
 
@@ -28,7 +31,13 @@ class LoggerService
             $loggable instanceof Response => $this->logResponse($loggable),
         };
 
-        CreateLogJob::dispatchAfterResponse($this->log->toArray());
+        // SECURITY: sanitize once, here, so every driver receives a clean
+        // record. Previously sanitization happened inside the LokiDriver only,
+        // which meant the database driver wrote raw `Authorization` headers
+        // and password fields straight into `api_logs`.
+        CreateLogJob::dispatchAfterResponse(
+            $this->sanitizer->sanitize($this->log->toArray()),
+        );
     }
 
     public function logLoggableEntity(Model $loggableEntity): void

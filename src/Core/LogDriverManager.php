@@ -15,8 +15,10 @@ class LogDriverManager
     /** @var array<string, LogDriverInterface> */
     private array $resolved = [];
 
-    public function __construct(private readonly Repository $config)
-    {
+    public function __construct(
+        private readonly Repository $config,
+        private readonly LogPayloadSanitizer $sanitizer,
+    ) {
     }
 
     public function default(): LogDriverInterface
@@ -46,12 +48,12 @@ class LogDriverManager
 
     private function makeLoki(array $cfg): LokiDriver
     {
-        $sanitizer = new LogPayloadSanitizer(
-            maxFieldBytes: (int) ($cfg['max_field_bytes'] ?? 8192),
-            redactHeaders: array_map('strtolower', (array) ($cfg['redact_headers'] ?? [])),
-            redactBodyKeys: array_map('strtolower', (array) ($cfg['redact_body_keys'] ?? [])),
-        );
-        return new LokiDriver($sanitizer, $cfg['channel'] ?? null);
+        // The sanitizer here is defensive: LoggerService already sanitizes
+        // before dispatching, so the data Loki sees is already clean. We pass
+        // the same shared instance so any caller bypassing LoggerService and
+        // hitting the driver directly is still covered. Sanitization is
+        // idempotent (key-based redaction).
+        return new LokiDriver($this->sanitizer, $cfg['channel'] ?? null);
     }
 
     private function makeStack(array $cfg): StackDriver
